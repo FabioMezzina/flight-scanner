@@ -68,35 +68,41 @@ try {
   // check if a flight solution exists
   if(!empty($solutions)) {
 
-    // set the lower price as the biggest number
-    $lowest_price = INF;
-    $lowest_index = 0;
-    // check if the current flight solution has a lower price. If so, update the lowest price and the lowest index
+    // initialize lowest price solutions array
+    $lowest_price_array = [
+      ['direct' => false,
+      'id_dep' => null,
+      'id_arr' => null,
+      'price' => INF,]
+    ];
+    // check if the current flight solution has a lower price. If so, it becomes the first and only element
     foreach ($solutions as $key => $solution) {
-      if($solution['price'] < $lowest_price) {
-        $lowest_price = $solution['price'];
-        $lowest_index = $key;
+      if($solution['price'] < $lowest_price_array[0]['price']) {
+        $lowest_price_array = [$solution];
+        // if it has an equal price, push it into the lowest price solutions array
+      } else if($solution['price'] == $lowest_price_array[0]['price']) {
+        $lowest_price_array[] = $solution;
       }
     }
-    // get the best flight option
-    $result = $solutions[$lowest_index];
 
-    // show the result to user
-    echo '<h2>The best flight solution for you:</h2>';
-    if($result['direct']) {
-      echo '<h4>Flight code: ' . $result['id_dep'] .'</h4>';
-    } else {
-      echo '<h4>First flight code: ' . $result['id_dep'] .'</h4>';
-      echo '<h4>Second flight code: ' . $result['id_arr'] .'</h4>';
+    // print the lowest price solutions array
+    echo '<h2>The best flight solutions for you:</h2>';
+    foreach ($lowest_price_array as $key => $result) {
+      echo '<h3>Solution nr. '. ($key + 1) .'</h3>';
+      if($result['direct']) {
+        echo '<h4>Flight code: ' . $result['id_dep'] .'</h4>';
+      } else {
+        echo '<h4>First flight code: ' . $result['id_dep'] .'</h4>';
+        echo '<h4>Second flight code: ' . $result['id_arr'] .'</h4>';
+      }
+      echo '<p>Total price: ' . $result['price'] . ' €</p>';
+      echo '<hr>';
     }
-    echo '<p>Total price: ' . $result['price'] . ' €</p>';
-
-  } else {
-    echo '<h2>We are sorry, there are no flights for your request :(</h2>';
+    } else {
+      echo '<h2>We are sorry, there are no flights for your request :(</h2>';
+    }
   }
 }
-  }
-  
 // errors handling
 catch(PDOException $exception) {
   die('ERROR: ' . $exception->getMessage());
